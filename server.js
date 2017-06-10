@@ -7,9 +7,8 @@ var app = express();
 // for the file stuff
 var fs = require('fs');
 var readable = require('stream').Readable;
+var random = require('random-js');
 
-// we've started you off with Express, 
-// but feel free to use whatever libs or frameworks you'd like through `package.json`.
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
@@ -49,12 +48,17 @@ function _to_svg(txt) {
   // template  
   var newtxt = txt.replace(/\n/g, " ");
   
-  // random rotation degree
-  var deg = 90;
+  // random rotation degree, now with more overkill 🎉
+  var engine = random.engines.mt19937().autoSeed();
+  var distribution = random.integer(-180, 180);
+  var deg = distribution(engine);
   
-  var svg = `<svg width="10em" height="10em" viewBox="-2 -2 4 4"
+  var size_distro = random.real(1,18);
+  var size = size_distro(engine);
+  
+  var svg = `<svg width="${size}em" height="${size}em" viewBox="-2 -2 4 4"
     xmlns="http://www.w3.org/2000/svg">
-  <polygon trasnform="rotate(${deg})" points="${newtxt}"/>
+  <polygon transform="rotate(${deg})" points="${newtxt}"/>
 </svg>`;
   
   return svg;
