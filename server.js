@@ -46,21 +46,25 @@ function _to_svg(txt) {
   // replace newlines,
   // viewbox calc (might not be necessary since the input's scaled)
   // template  
-  var newtxt = txt.replace(/\n/g, " ");
+  var poly = _to_polygon(txt);
   
+  var engine = random.engines.mt19937().autoSeed();
+  var distribution = random.real(1,18);
+  var size = distribution(engine);
+  
+  var svg = `<svg width="${size}em" height="${size}em" viewBox="-2 -2 4 4"
+    xmlns="http://www.w3.org/2000/svg">${poly}</svg>`;
+  
+  return svg;
+}
+
+function _to_polygon(txt) {
+  var newtxt = txt.replace(/\n/g, " ");
   // random rotation degree, now with more overkill 🎉
   var engine = random.engines.mt19937().autoSeed();
   var distribution = random.integer(-180, 180);
   var deg = distribution(engine);
-  
-  var size_distro = random.real(1,18);
-  var size = size_distro(engine);
-  
-  var svg = `<svg width="${size}em" height="${size}em" viewBox="-2 -2 4 4"
-    xmlns="http://www.w3.org/2000/svg">
-  <polygon transform="rotate(${deg})" points="${newtxt}"/>
-</svg>`;
-  
+  var svg = `<polygon transform="rotate(${deg})" points="${newtxt}"/>`; 
   return svg;
 }
 
