@@ -33,6 +33,8 @@ app.get("/leaf", function (request, response) {
 });
 
 // putting it here for now to avoid the cache wonk
+var engine = random.engines.mt19937().autoSeed();
+
 function _get_file() {
   var files = [];
   fs.readdirSync(__dirname+'/public/leaves/').forEach(function(f) {
@@ -46,26 +48,39 @@ function _to_svg(txt) {
   // replace newlines,
   // viewbox calc (might not be necessary since the input's scaled)
   // template  
-  var poly = _to_polygon(txt);
   
-  var engine = random.engines.mt19937().autoSeed();
+  // this is also ridiculous given a polygon can just be, you know, styled
+  // i don't care i live for the absurd.
+  var fxns = [_to_polygon, _to_polyline];
+  
+  var geom = fxns[Math.floor(Math.random() * fxns.length)](txt);
+  
   var distribution = random.real(1,18);
   var size = distribution(engine);
   
   var svg = `<svg width="${size}em" height="${size}em" viewBox="-2 -2 4 4"
-    xmlns="http://www.w3.org/2000/svg">${poly}</svg>`;
+    xmlns="http://www.w3.org/2000/svg">${geom}</svg>`;
   
   return svg;
 }
 
 function _to_polygon(txt) {
-  var newtxt = txt.replace(/\n/g, " ");
+  var newtxt = _clean(txt);
   // random rotation degree, now with more overkill 🎉
-  var engine = random.engines.mt19937().autoSeed();
   var distribution = random.integer(-180, 180);
   var deg = distribution(engine);
-  var svg = `<polygon transform="rotate(${deg})" points="${newtxt}"/>`; 
-  return svg;
+  return `<polygon transform="rotate(${deg})" points="${newtxt}"/>`; 
+}
+
+function _to_polyline(txt) {
+  var newtxt = _clean(txt);
+  var distribution = random.integer(-180, 180);
+  var deg = distribution(engine);
+  return `<polyline transform="rotate(${deg})" points="${newtxt}" stroke="orange" fill="none" stroke-width="0.05px"/>`; 
+}
+
+function _clean(txt) {
+  return txt.replace(/\n/g, " ");
 }
 
 
