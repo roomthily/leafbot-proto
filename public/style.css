@@ -26,61 +26,36 @@ p {
   max-width: 600px;
 }
 
-form {
-  margin-bottom: 25px;
-  padding: 15px;
-  background-color: cyan;
-  display: inline-block;
-  width: 100%;
-  max-width: 340px;
-  border-radius: 3px;
+main {
+  display: grid;
+  grid-auto-rows: repeat(3, minmax(5em, 21em));
+  grid-template-columns: repeat(2, minmax(5em, 21em));
 }
 
-input {
-  display: block;
-  margin-bottom: 10px;
-  padding: 5px;
-  width: 100%;
-  border: 1px solid lightgrey;
-  border-radius: 3px;
-  font-size: 16px;
+section {
+  margin: 2em 5em;
 }
 
-button {
-  font-size: 16px;
-  border-radius: 3px;
-  background-color: lightgrey;
-  border: 1px solid grey;
-  box-shadow: 2px 2px teal;
-  cursor: pointer;
+#flim{
+  grid-row: 2;
+  grid-column: 1;
+}
+#flam {
+  grid-row: 2;
+  grid-column: 2;
+}
+#blender {
+  grid-row: 3;
+  height:100%;
+  
 }
 
-button:hover {
-  background-color: yellow;
-}
 
-button:active {
-  box-shadow: none;
-}
-
-li {
-  margin-bottom: 5px;
-}
-
-footer {
-  margin-top: 50px;
-  padding-top: 25px;
-  border-top: 1px solid lightgrey;
-}
-
-footer > a {
-  color: #BBBBBB;
-}
 
 
 /** for later **/
 /** https://codepen.io/roomthily/pen/QgyxXp?editors=1100 **/
-svg{
+/* svg{
   fill: rgba(237, 12, 113, 0.1);
   transform: rotate(-30deg);
-}
+} */
