@@ -44,7 +44,7 @@ function _get_file() {
   fs.readdirSync(__dirname+'/public/leaves/').forEach(function(f) {
     files.push(__dirname+'/public/leaves/' + f);
   });
-  var file = files[Math.floor(Math.random() * files.length)];
+  var file = random.pick(engine, files);
   return fs.readFileSync(file, "utf8");
 }
 
@@ -57,19 +57,21 @@ function _to_svg(txt) {
   // i don't care i live for the absurd.
   var fxns = [_to_polygon, _to_polyline];
   
-  var geom = fxns[Math.floor(Math.random() * fxns.length)](txt);
-  
   var distribution = random.real(1,18);
   var size = distribution(engine);
   
-  var p = _def();
-  var geom = fxns[Math.floor(Math.random() * fxns.length)](txt, p != undefined ? p.id : undefined);
+  var fxn = random.pick(engine, fxns);
+  var p = _def(fxn.name);
+  var geom = fxn(txt, p.id);
   
-  var svg = p != undefined ? `<svg width="${size}em" height="${size}em" viewBox="-10 -8 20 20"
-    xmlns="http://www.w3.org/2000/svg"><defs>${p.pattern}</defs>${geom}</svg>` : `<svg width="${size}em" height="${size}em" viewBox="-2 -2 4 4"
+  if (p.pattern === undefined) {
+      return `<svg width="${size}em" height="${size}em" viewBox="-2 -2 4 4"
     xmlns="http://www.w3.org/2000/svg">${geom}</svg>`;
-  
-  return svg;
+  } else {
+    // it's a pattern (this is not great)
+    return `<svg width="${size}em" height="${size}em" viewBox="-10 -8 20 20"
+    xmlns="http://www.w3.org/2000/svg"><defs>${p.pattern}</defs>${geom}</svg>`;
+  }
 }
 
 function _to_polygon(txt, def_id=undefined) {
@@ -86,7 +88,7 @@ function _to_polyline(txt, def_id=undefined) {
   var deg = distribution(engine);
   
   //stroke="orange" stroke-width="0.05px"
-  return def_id != undefined ? `<polyline transform="rotate(${deg})" style="fill: ${def_id}" points="${newtxt}"/>` : `<polyline transform="rotate(${deg})" points="${newtxt}" fill="none" stroke="black" stroke-width="0.05px"/>`; 
+  return def_id != undefined ? `<polyline transform="rotate(${deg})" style="fill: ${def_id}" points="${newtxt}"/>` : `<polyline transform="rotate(${deg})" points="${newtxt}"/>`; 
 }
 
 function _clean(txt) {
@@ -102,18 +104,34 @@ function _normalize(txt) {
   var rng = scale.scaleLinear().domain([-2, 2]).range([-10, 10]);
   
   // rescale the arrays & rebuild the string
-  return pairs.map(subarr => subarr.map(a => rng(a)).join(',')).join(' '); 
+  return pairs.map(subarr => subarr.map(a => rng(a).toPrecision(5)).join(',')).join(' '); 
 }
 
-function _def() {
+function _def(fxn_name=undefined) {
   // return a random pattern
   
   var svgPatterns = [patterns.lines, patterns.caps, patterns.circles, patterns.crosses, patterns.hexagons, patterns.rhombic, patterns.nylon, patterns.rhombic3d, patterns.squares, patterns.waves, patterns.woven, undefined];
   
   var pattern = random.pick(engine, svgPatterns);
   
+  // <defs>
+  //   <style type="text/css">
+  //   rect    { fill: #95a8b1; stroke: #333; stroke-width: 6px; }
+  // </style>
+  // </defs>
   if (pattern === undefined) {
-    return undefined;
+    if (fxn_name === undefined) {
+      return {pattern: undefined, id: undefined};
+    }
+    
+    var stylename = fxn_name.replace('_to_', '');
+    var stroke = hexcolor();
+    var fill = hexcolor();
+    var strokewidth = 0.2;
+    
+    var style = `<style type="text/css">${stylename} {fill: ${fill}; stroke: ${stroke}; stroke-width: ${strokewidth}px;}</style>`;
+    // console.log('STYLE', style);
+    return {pattern: style, id: undefined};
   }
   
   const defaults = {
@@ -128,9 +146,8 @@ function _def() {
   if (pattern.name == 'circles') {
     defaults.radius = 3;
     defaults.complement = true;
-    
   } else if (pattern.name == 'lines') {
-    defaults.orientations = [45];  // 0, 45, -45, 90
+    defaults.orientations = [random.pick(engine, [0, 45, -45, 90])]; 
   }
   
   // so the leaves are very smol and the scaling does not 
