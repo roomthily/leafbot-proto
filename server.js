@@ -2,15 +2,16 @@
 // where your node app starts
 
 // init project
-var express = require('express');
-var app = express();
+var express = require('express'),
+    app = express();
 // for the file stuff
-var fs = require('fs');
-var readable = require('stream').Readable;
-var random = require('random-js');
-var patterns = require('svg-patterns');
-const stringify = require('virtual-dom-stringify');
-const scale = require('d3-scale');
+var fs = require('fs'),
+    readable = require('stream').Readable,
+    random = require('random-js'),
+    patterns = require('svg-patterns'),
+    stringify = require('virtual-dom-stringify'),
+    scale = require('d3-scale'),
+    hexcolor = require('random-hex-color');
 
 
 // http://expressjs.com/en/starter/static-files.html
@@ -64,12 +65,6 @@ function _to_svg(txt) {
   var p = _def();
   var geom = fxns[Math.floor(Math.random() * fxns.length)](txt, p != undefined ? p.id : undefined);
   
-  console.log(p);
-  
-  // var svg = p != undefined ? `<svg width="${size}em" height="${size}em" viewBox="-2 -2 4 4"
-  //   xmlns="http://www.w3.org/2000/svg"><defs>${p.pattern}</defs>${geom}</svg>` : `<svg width="${size}em" height="${size}em" viewBox="-2 -2 4 4"
-  //   xmlns="http://www.w3.org/2000/svg">${geom}</svg>`;
-  
   var svg = p != undefined ? `<svg width="${size}em" height="${size}em" viewBox="-10 -8 20 20"
     xmlns="http://www.w3.org/2000/svg"><defs>${p.pattern}</defs>${geom}</svg>` : `<svg width="${size}em" height="${size}em" viewBox="-2 -2 4 4"
     xmlns="http://www.w3.org/2000/svg">${geom}</svg>`;
@@ -89,7 +84,9 @@ function _to_polyline(txt, def_id=undefined) {
   var newtxt = _normalize(txt);
   var distribution = random.integer(-180, 180);
   var deg = distribution(engine);
-  return def_id != undefined ? `<polyline transform="rotate(${deg})" style="fill: ${def_id}" points="${newtxt}" stroke="orange" stroke-width="0.05px"/>` : `<polyline transform="rotate(${deg})" points="${newtxt}" fill="none" stroke="black" stroke-width="0.05px"/>`; 
+  
+  //stroke="orange" stroke-width="0.05px"
+  return def_id != undefined ? `<polyline transform="rotate(${deg})" style="fill: ${def_id}" points="${newtxt}"/>` : `<polyline transform="rotate(${deg})" points="${newtxt}" fill="none" stroke="black" stroke-width="0.05px"/>`; 
 }
 
 function _clean(txt) {
@@ -101,12 +98,8 @@ function _normalize(txt) {
   // start from the raw, \n delims
   var txt_pairs = txt.split(/\n/g);
   var pairs = txt_pairs.map((a) => a.split(',').map(Number));
-  
-  //max, mins
-  var mn = -2;
-  var mx = 2;
-  
-  var rng = scale.scaleLinear().domain([mn, mx]).range([-10, 10]);
+    
+  var rng = scale.scaleLinear().domain([-2, 2]).range([-10, 10]);
   
   // rescale the arrays & rebuild the string
   return pairs.map(subarr => subarr.map(a => rng(a)).join(',')).join(' '); 
@@ -124,25 +117,25 @@ function _def() {
   }
   
   const defaults = {
-    size: 2,
-    stroke: '#3F7FBF',
-    strokeWidth: 1,
-    background: null // || ''
+    size: 0.5,
+    stroke: hexcolor(),
+    strokeWidth: 0.1,
+    background: hexcolor(),
+    fill: hexcolor()
   }
   
   // can add fill, orientation, circle bits
-
+  if (pattern.name == 'circles') {
+    defaults.radius = 3;
+    defaults.complement = true;
+    
+  } else if (pattern.name == 'lines') {
+    defaults.orientations = [45];  // 0, 45, -45, 90
+  }
   
   // so the leaves are very smol and the scaling does not 
   // handle the fill pattern in a great way.
-  const generated = patterns.lines({
-    size: 0.5,
-    stroke: 'orange',
-    strokeWidth: 0.1,
-    // background: '#C14242',
-    background: '#fff',
-    orientations: [45]
-});
+  const generated = pattern(defaults);
   
   // this virtual dom lib is deprecated but the suggested replacement does not
   // handle the path of the pattern (at all, empty elem)

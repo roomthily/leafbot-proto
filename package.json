@@ -15,7 +15,8 @@
     "vdom-to-html": "^2.3.1",
     "svg-patterns": "^0.1.2",
     "virtual-dom-stringify": "^3.0.1",
-    "d3-scale": "^1.0.6"
+    "d3-scale": "^1.0.6",
+    "random-hex-color": "^1.0.1"
   },
   "engines": {
     "node": "6.10.x"
