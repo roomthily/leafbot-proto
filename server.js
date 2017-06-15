@@ -57,7 +57,7 @@ function _to_svg(txt) {
   // i don't care i live for the absurd.
   var fxns = [_to_polygon, _to_polyline];
   
-  var distribution = random.real(1,18);
+  var distribution = random.real(5,28);
   var size = distribution(engine);
   
   var fxn = random.pick(engine, fxns);
@@ -142,9 +142,17 @@ function _def(fxn_name=undefined) {
     fill: hexcolor()
   }
   
+  if (random.bool()(engine)) {
+    // let's make it more macpainty.
+    // macpaintery.
+    // desaturated.
+    defaults.background = undefined,
+    defaults.fill = undefined
+  }
+  
   // can add fill, orientation, circle bits
   if (pattern.name == 'circles') {
-    defaults.radius = 3;
+    defaults.radius = random.integer(1,15)(engine);
     defaults.complement = true;
   } else if (pattern.name == 'lines') {
     defaults.orientations = [random.pick(engine, [0, 45, -45, 90])]; 
