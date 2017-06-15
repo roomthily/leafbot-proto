@@ -33,7 +33,7 @@ main {
 }
 
 section {
-  margin: 2em 5em;
+  margin: 2em;
 }
 
 #flim{
@@ -48,6 +48,24 @@ section {
   grid-row: 3;
   height:100%;
   
+}
+
+button {
+  -webkit-border-radius: 28;
+  -moz-border-radius: 28;
+  border-radius: 28px;
+  color: #050505;
+  font-size: 12px;
+  background: #8abbdb;
+  padding: 10px 20px 10px 20px;
+  text-decoration: none;
+  border: none;
+  margin: 1em;
+}
+
+button:hover {
+  background: #f1a2f2;
+  text-decoration: none;
 }
 
 
